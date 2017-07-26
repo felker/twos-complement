@@ -15,7 +15,7 @@ const int MAX_ITER = 10000;
 const double MAX_DISTANCE = 1 << 18;
 
 #pragma acc routine(cal_pixel) seq
-void cal_pixel(const Complex &pt, Color &c){
+void cal_pixel(double pixel_size, const Complex &pt, Color &c){
   int iter;
   Complex z, dz;
   double temp, length_sq, distance;
@@ -108,6 +108,7 @@ int main(int argc, char **argv){
   int mystrt, myend;
   int nrows_l;
   int nprocs, mype;
+  double pixel_size;
 
   MPI_Status status;
 
@@ -128,6 +129,7 @@ int main(int argc, char **argv){
   /* get command line args */
   nx = atoi(argv[1]);
   ny = atoi(argv[2]);
+  pixel_size = 4.0/((double)nx);
 
   /* assume divides equally */
   nrows_l = nx/nprocs;
@@ -147,31 +149,31 @@ int main(int argc, char **argv){
     for (j = 0; j < ny; ++j){
       c.real = i/((double) nx) * 4. - 2.;
       c.imag = j/((double) ny) * 4. - 2.;
-      cal_pixel(c);
+      cal_pixel(pixel_size,c,data[i*nx + j]);
     }
   }
   //  data_l = data_l_tmp;
 #pragma acc exit data copyout(data[0:nrows_l*ny])
   if (mype == MASTERPE){
-    file = fopen("mandelbrot.bin_0000", "w");
+    file = fopen("mandelbrot.bin", "w");
     printf("nrows_l, ny  %d %d\n", nrows_l, ny);
     fprintf(file,"P5\n");
     fprintf(file,"%d %d\n",nrows_l,ny);
     fprintf(file,"%d\n",255);
-    fwrite(data_l_char, nrows_l*ny, sizeof(char), file);
+    fwrite(data, nrows_l*ny, sizeof(Color), file);
     fclose(file);
 
     for (i = 1; i < nprocs; ++i){
-      MPI_Recv(data_l, nrows_l * ny, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, &status);
-      printf("received message from proc %d\n", i);
-      file = fopen("mandelbrot.bin_0000", "a");
-      fwrite(data_l, nrows_l*ny, sizeof(double), file);
-      fclose(file);
+      //MPI_Recv(data_l, nrows_l * ny, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, &status);
+      //printf("received message from proc %d\n", i);
+      //file = fopen("mandelbrot.bin_0000", "a");
+      //fwrite(data_l, nrows_l*ny, sizeof(double), file);
+      //fclose(file);
     }
   }
 
   else{
-    MPI_Send(data_l, nrows_l * ny, MPI_DOUBLE, MASTERPE, 0, MPI_COMM_WORLD);
+    //MPI_Send(data_l, nrows_l * ny, MPI_DOUBLE, MASTERPE, 0, MPI_COMM_WORLD);
   }
 
   MPI_Finalize();

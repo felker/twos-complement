@@ -32,7 +32,7 @@ $(OBJ_DIR):
 
 $(EXECUTABLES): % : $(OBJ_DIR)%.o
 # echo $(subst bin/,obj/, $@).o
-	$(CXX) $(CXXFLAGS) $(OBJ_DIR)$< -o $(EXE_DIR)$@ $(LDFLAGS) $(LDLIBS)
+	$(CXX) $(CXXFLAGS) $< -o $(EXE_DIR)$@ $(LDFLAGS) $(LDLIBS)
 
 # Create objects from source files
 $(OBJ_DIR)%.o : %.c

@@ -14,7 +14,7 @@ int cal_pixel(Complex c){
   Complex z;
   double temp, lengthsq;
 
-  max_iter = 256;
+  max_iter = 255;
   z.real = 0;
   z.imag = 0;
   count = 0;

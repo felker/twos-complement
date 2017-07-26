@@ -47,11 +47,9 @@ void hsv_to_rgb(const double *hsv, double *rgb) {
 } 
 
 #pragma acc routine(cal_color) seq
-Color cal_color(double pixel_size, double distance, int iter) {
-  Color c;
+void cal_color(double pixel_size, double distance, int iter, Color *c) {
   if(iter >= MAX_ITER) {
     c[0] = 255; c[1] = 255; c[2] = 255;
-    return c;
   }
   // compute hsv
   double temp;
@@ -73,11 +71,10 @@ Color cal_color(double pixel_size, double distance, int iter) {
   for(int i = 0; i < 3; ++i) {
     c[i] = (char)255*rgb[i];
   }
-  return c;
 }
 
 #pragma acc routine(cal_pixel) seq
-Color cal_pixel(double pixel_size, Complex pt){
+void cal_pixel(double pixel_size, Complex pt, Color *c){
   int iter;
   Complex z, dz;
   double temp, length_sq, distance;
@@ -98,7 +95,7 @@ Color cal_pixel(double pixel_size, Complex pt){
   while ((length_sq < MAX_LENGTH_SQ) && (iter < MAX_ITER));
   temp = dz.real * dz.real + dz.imag + dz.imag;
   distance = 2*log(length_sq) * length_sq / temp;
-  return cal_color(pixel_size,distance,iter);
+  cal_color(pixel_size,distance,iter,c);
 }
 
 #define MASTERPE 0
@@ -154,7 +151,7 @@ int main(int argc, char **argv){
     for (j = 0; j < ny; ++j){
       pt.real = i/((double) nx) * 4. - 2.;
       pt.imag = j/((double) ny) * 4. - 2.;
-      data[i*nx + j] = cal_pixel(pixel_size,pt);
+      cal_pixel(pixel_size,pt,data[i*nx+j]);
     }
   }
 #pragma acc exit data copyout(data[0:nrows_l*ny])

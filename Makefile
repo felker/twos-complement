@@ -46,16 +46,16 @@ launch_session:
 	bsub -n 20 -x -P CSC261 -W 120 -Is $$SHELL
 
 run:
-	mpirun -n 1 ./mandelbrot_mpi 1000 1000
+	mpirun -n 1 ./bin/mandelbrot_mpi_color 1000 1000
 
 run_profile:
-	mpirun -n 1 nvprof --print-gpu-summary ./mandelbrot_mpi 1000 1000
+	mpirun -n 1 nvprof --print-gpu-summary ./bin/mandelbrot_mpi_color 1000 1000
 
 # Cleanup
 
 clean:
 	rm -rf $(OBJ_DIR)*
-	rm -rf $(addprefix $(EXE_DIR),$(notdir $(SRC_FILES:.c=))))
+	rm -rf $(addprefix $(EXE_DIR),$(notdir $(SRC_FILES:.c=)))
 #rm *o mandelbrot
 
 

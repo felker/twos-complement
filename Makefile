@@ -1,5 +1,5 @@
 CXX := mpicc
-CXXFLAGS := -acc -Minline -Minfo=accel -ta=tesla,cuda8.0,cc60,pinned
+CXXFLAGS := #-acc -Minline -Minfo=accel -ta=tesla,cuda8.0,cc60,pinned
 LDFLAGS :=
 LDLIBS :=
 
@@ -30,7 +30,7 @@ $(OBJ_DIR):
 
 # Link objects into executable(s)
 
-$(EXECUTABLES): % : $(OBJ_DIR)%.o :
+$(EXECUTABLES): % : $(OBJ_DIR)%.o
 # echo $(subst bin/,obj/, $@).o
 	$(CXX) $(CXXFLAGS) $(OBJ_DIR)$< -o $(EXE_DIR)$@ $(LDFLAGS) $(LDLIBS)
 

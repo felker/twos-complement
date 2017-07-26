@@ -8,6 +8,7 @@ typedef struct complex{
   double imag;
 } Complex;
 
+#pragma acc routine(cal_pixel) vector
 int cal_pixel(Complex c){
   int count, max_iter;
   Complex z;

@@ -67,7 +67,7 @@ int main(int argc, char **argv){
 
   /* create buffer for local work only */
   data_l = (double *) malloc(nrows_l * ny * sizeof(double));
-#pragma acc data create(data_l)
+#pragma acc data create(data_l[0:nrows_l*ny])
   //  data_l_tmp = data_l;
 
   /* calculate each processor's region of work */
@@ -86,7 +86,7 @@ int main(int argc, char **argv){
     }
   }
   //  data_l = data_l_tmp;
-#pragma acc exit data copyout(data_l)
+#pragma acc exit data copyout(data_l[0:nrows_l*ny])
   if (mype == MASTERPE){
     file = fopen("mandelbrot.bin_0000", "w");
     printf("nrows_l, ny  %d %d\n", nrows_l, ny);

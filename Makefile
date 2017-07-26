@@ -31,7 +31,7 @@ $(OBJ_DIR):
 # Link objects into executable(s)
 
 $(EXECUTABLE): $(OBJ_FILES)
-	$(CXX) $(CXXFLAGS) mandelbrot_mpi.o -o $@ $(LDFLAGS) $(LDLIBS)
+	$(CXX) $(CXXFLAGS) $(OBJ_DIR)mandelbrot_mpi.o -o $@ $(LDFLAGS) $(LDLIBS)
 
 # Create objects from source files
 $(OBJ_DIR)%.o : %.c

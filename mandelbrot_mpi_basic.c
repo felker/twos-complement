@@ -36,7 +36,7 @@ int main(int argc, char **argv){
   int i, j;
   Complex c;
   int tmp;
-  double *data_l, *data_l_tmp;
+  double restrict *data_l, restrict *data_l_tmp;
   int nx, ny;
   int mystrt, myend;
   int nrows_l;

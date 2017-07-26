@@ -47,7 +47,7 @@ void hsv_to_rgb(const double *hsv, double *rgb) {
 } 
 
 #pragma acc routine(cal_color) seq
-void cal_color(double pixel_size, double distance, int iter, Color *c) {
+void cal_color(double pixel_size, double distance, int iter, unsigned char *c) {
   if(iter >= MAX_ITER) {
     for(int i = 0; i < 2; ++i) {
       c[i] = (unsigned char)255;
@@ -77,7 +77,7 @@ void cal_color(double pixel_size, double distance, int iter, Color *c) {
 }
 
 #pragma acc routine(cal_pixel) seq
-void cal_pixel(double pixel_size, Complex pt, Color *c){
+void cal_pixel(double pixel_size, Complex pt,unsigned char *c){
   int iter;
   Complex z, dz;
   double temp, length_sq, distance;

@@ -1,5 +1,5 @@
 CXX := mpicc
-CXXFLAGS := #-acc -Minline -Minfo=accel -ta=tesla,cuda8.0,cc60,pinned
+CXXFLAGS := -acc -Minline -Minfo=accel -ta=tesla,cuda8.0,cc60,pinned
 LDFLAGS :=
 LDLIBS :=
 

@@ -149,7 +149,7 @@ int main(int argc, char **argv){
   myend  = mystrt + nrows_l - 1;
 
   /* calc each procs coordinates and call local mandelbrot set function */
-#pragma acc parallel loop private(c, tmp) collapse(2) present(data[0:nrows_l*ny])
+#pragma acc parallel loop private(pt) collapse(2) present(data[0:nrows_l*ny])
   for (i = mystrt; i <= myend; ++i){
     for (j = 0; j < ny; ++j){
       pt.real = i/((double) nx) * 4. - 2.;

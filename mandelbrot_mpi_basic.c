@@ -12,7 +12,7 @@ int cal_pixel(Complex c){
   int count, max_iter;
   Complex z;
   double temp, lengthsq;
-  
+
   max_iter = 256;
   z.real = 0;
   z.imag = 0;
@@ -62,7 +62,7 @@ int main(int argc, char **argv){
   ny = atoi(argv[2]);
 
   /* assume divides equally */
-  nrows_l = nx/nprocs; 
+  nrows_l = nx/nprocs;
 
   /* create buffer for local work only */
   data_l = (double *) malloc(nrows_l * ny * sizeof(double));
@@ -71,12 +71,13 @@ int main(int argc, char **argv){
   /* calculate each processor's region of work */
   mystrt = mype*nrows_l;
   myend  = mystrt + nrows_l - 1;
-  
+
   /* calc each procs coordinates and call local mandelbrot set function */
+#pragma acc parallel loop private(c, tmp)
   for (i = mystrt; i <= myend; ++i){
-    c.real = i/((double) nx) * 4. - 2. ; 
     for (j = 0; j < ny; ++j){
-      c.imag = j/((double) ny) * 4. - 2. ; 
+      c.real = i/((double) nx) * 4. - 2.;
+      c.imag = j/((double) ny) * 4. - 2.;
       tmp = cal_pixel(c);
       *data_l++ = (double) tmp;
     }
@@ -100,7 +101,7 @@ int main(int argc, char **argv){
 
   else{
     MPI_Send(data_l, nrows_l * ny, MPI_DOUBLE, MASTERPE, 0, MPI_COMM_WORLD);
-  }  
+  }
 
   MPI_Finalize();
 }

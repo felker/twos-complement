@@ -2,7 +2,8 @@
 #include<assert.h>
 #include<stdlib.h>
 #include<mpi.h>
-#include<math.h>
+//#include<math.h>
+#include<accelmath.h>
 
 typedef struct complex{
   double real;
@@ -11,9 +12,9 @@ typedef struct complex{
 
 typedef unsigned char Color[3];
 
-const double MAX_LENGTH_SQ = 4;
-const int MAX_ITER = 10000;
-const double MAX_DISTANCE = 1 << 18;
+#define MAX_LENGTH_SQ 4
+#define MAX_ITER 10000
+#define MAX_DISTANCE = 1<<18
 
 
 #pragma acc routine(hsv_to_rgb) seq
@@ -44,10 +45,11 @@ void hsv_to_rgb(const double *hsv, double *rgb) {
   for(int i = 0; i < 3; i++) {
     rgb[i] += m;
   }
-} 
+}
 
 #pragma acc routine(cal_color) seq
 void cal_color(double pixel_size, double distance, int iter, unsigned char *c) {
+
   if(iter >= MAX_ITER) {
     for(int i = 0; i < 2; ++i) {
       c[i] = (unsigned char)255;
@@ -88,7 +90,7 @@ void cal_pixel(double pixel_size, Complex pt,unsigned char *c){
   do{
     temp = z.real * dz.real - z.imag * dz.imag;
     dz.imag = 4 * dz.real * z.imag;
-    dz.real = 2 * temp + 1; 
+    dz.real = 2 * temp + 1;
     temp = z.real * z.real - z.imag * z.imag + pt.real;
     z.imag = 2 * z.real * z.imag + pt.imag;
     z.real = temp;

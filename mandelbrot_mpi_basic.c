@@ -37,6 +37,8 @@ int main(int argc, char **argv){
   Complex c;
   int tmp;
   double *restrict data_l, *restrict data_l_tmp;
+  // for writing out integers
+  int *restrict data_l_int;
   int nx, ny;
   int mystrt, myend;
   int nrows_l;
@@ -67,6 +69,7 @@ int main(int argc, char **argv){
 
   /* create buffer for local work only */
   data_l = (double *) malloc(nrows_l * ny * sizeof(double));
+  data_l_int = (int *) malloc(nrows_l * ny * sizeof(int));
 #pragma acc enter data create(data_l[0:nrows_l*ny])
   //  data_l_tmp = data_l;
 
@@ -88,12 +91,18 @@ int main(int argc, char **argv){
   //  data_l = data_l_tmp;
 #pragma acc exit data copyout(data_l[0:nrows_l*ny])
   if (mype == MASTERPE){
+    // convert to integers
+    for (i = mystrt; i <= myend; ++i){
+      for (j = 0; j < ny; ++j){
+        data_l_int[i*ny+j] = (int) data_l[i*ny+j];
+      }
+    }
     file = fopen("mandelbrot.bin_0000", "w");
     printf("nrows_l, ny  %d %d\n", nrows_l, ny);
     fprintf(file,"P5\n");
     fprintf(file,"%d %d\n",nrows_l,ny);
     fprintf(file,"%d\n",255);
-    fwrite(data_l, nrows_l*ny, sizeof(double), file);
+    fwrite(data_l_int, nrows_l*ny, sizeof(int), file);
     fclose(file);
 
     for (i = 1; i < nprocs; ++i){

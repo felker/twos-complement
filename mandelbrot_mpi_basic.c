@@ -67,7 +67,7 @@ int main(int argc, char **argv){
 
   /* create buffer for local work only */
   data_l = (double *) malloc(nrows_l * ny * sizeof(double));
-#pragma acc data create(data_l[0:nrows_l*ny])
+#pragma acc enter data create(data_l[0:nrows_l*ny])
   //  data_l_tmp = data_l;
 
   /* calculate each processor's region of work */

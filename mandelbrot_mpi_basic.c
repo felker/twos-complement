@@ -90,6 +90,9 @@ int main(int argc, char **argv){
   if (mype == MASTERPE){
     file = fopen("mandelbrot.bin_0000", "w");
     printf("nrows_l, ny  %d %d\n", nrows_l, ny);
+    fprintf(file,"P5\n");
+    fprintf(file,"%d %d\n",nrows_l,ny);
+    fprintf(file,"%d\n",255);
     fwrite(data_l, nrows_l*ny, sizeof(double), file);
     fclose(file);
 

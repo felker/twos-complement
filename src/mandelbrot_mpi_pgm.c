@@ -97,7 +97,7 @@ int main(int argc, char **argv){
         data_l_char[i*ny+j] = (char) data_l[i*ny+j];
       }
     }
-    file = fopen("mandelbrot.bin_0000", "w");
+    file = fopen("mandelbrot.pgm", "w");
     printf("nrows_l, ny  %d %d\n", nrows_l, ny);
     fprintf(file,"P5\n");
     fprintf(file,"%d %d\n",nrows_l,ny);
@@ -108,7 +108,7 @@ int main(int argc, char **argv){
     for (i = 1; i < nprocs; ++i){
       MPI_Recv(data_l, nrows_l * ny, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, &status);
       printf("received message from proc %d\n", i);
-      file = fopen("mandelbrot.bin_0000", "a");
+      file = fopen("mandelbrot.pgm", "a");
       fwrite(data_l, nrows_l*ny, sizeof(double), file);
       fclose(file);
     }

@@ -4,8 +4,8 @@ LDFLAGS :=
 LDLIBS :=
 
 EXE_DIR :=  bin/
-EXECUTABLE := $(EXE_DIR)mandelbrot_mpi
 SRC_FILES := $(wildcard src/*.c)
+EXECUTABLES := $(notdir $(SRC_FILES:.c=))
 
 OBJ_DIR :=  obj/
 SRC_DIR :=  src/
@@ -18,7 +18,7 @@ VPATH := $(SRC_DIR)
 
 .PHONY : all dirs clean
 
-all: dirs $(EXECUTABLE)
+all: dirs $(EXECUTABLES)
 
 dirs : $(EXE_DIR) $(OBJ_DIR)
 
@@ -30,8 +30,9 @@ $(OBJ_DIR):
 
 # Link objects into executable(s)
 
-$(EXECUTABLE): $(OBJ_FILES)
-	$(CXX) $(CXXFLAGS) $(OBJ_DIR)mandelbrot_mpi.o -o $@ $(LDFLAGS) $(LDLIBS)
+$(EXECUTABLES): % : $(OBJ_DIR)%.o :
+# echo $(subst bin/,obj/, $@).o
+	$(CXX) $(CXXFLAGS) $(OBJ_DIR)$< -o $(EXE_DIR)$@ $(LDFLAGS) $(LDLIBS)
 
 # Create objects from source files
 $(OBJ_DIR)%.o : %.c

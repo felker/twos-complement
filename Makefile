@@ -55,7 +55,7 @@ run_profile:
 
 clean:
 	rm -rf $(OBJ_DIR)*
-	rm -rf $(addprefix $(EXE_DIR),$(notdir $(SRC_FILES:.c=))))
+	rm -rf $(addprefix $(EXE_DIR),$(notdir $(SRC_FILES:.c=)))
 #rm *o mandelbrot
 
 

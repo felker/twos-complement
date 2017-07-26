@@ -2,6 +2,7 @@
 #include<assert.h>
 #include<stdlib.h>
 #include<mpi.h>
+#include<math.h>
 
 typedef struct complex{
   double real;
@@ -14,64 +15,13 @@ const double MAX_LENGTH_SQ = 4;
 const int MAX_ITER = 10000;
 const double MAX_DISTANCE = 1 << 18;
 
-#pragma acc routine(cal_pixel) seq
-void cal_pixel(double pixel_size, const Complex &pt, Color &c){
-  int iter;
-  Complex z, dz;
-  double temp, length_sq, distance;
-  z.real = 0; z.imag = 0;
-  dz.real = 0; dz.real = 0;
-  iter = 0;
-
-  do{
-    temp = z.real * dz.real - z.imag * dz.imag;
-    dz.imag = 4 * dz.real * z.imag;
-    dz.real = 2 * temp + 1; 
-    temp = z.real * z.real - z.imag * z.imag + pt.real;
-    z.imag = 2 * z.real * z.imag + pt.imag;
-    z.real = temp;
-    length_sq = z.real * z.real + z.imag * z.imag;
-    iter++;
-  }
-  while ((lengthsq < MAX_LENGTH_SQ) && (count < MAX_ITER));
-  temp = dz.real * dz.real + dz.imag + dz.imag;
-  distance = 2*std::log(length_sq) * length_sq / temp;
-  cal_color(pixel_size,distance,iter,c);
-}
-
-#pragma acc routine(cal_color) seq
-void cal_color(double pixel_size, double distance, int iter, Color &c) {
-  if(iter >= MAX_ITER) {
-    c[0] = 255; c[1] = 255; c[2] = 255;
-    return;
-  }
-  // compute hsv
-  double temp;
-  temp = std::log(iter) / std::log(MAX_ITER);
-  temp *= 10; temp -= std::floor(temp);
-  double hsv[3], rgb[3];
-  hsv[0] = temp;
-  hsv[1] = 0.7;
-  if(distance < 0.5*pixel_size) {
-    temp = std::pow(2*distance/pixel_size,1./3);
-    hsv[2] = temp;
-  else {
-    hsv[2] = 1;
-  }
-  // convert to hsv
-  hsv_to_rgb(hsv,rgb);
-  // convert to char
-  for(int i = 0; i < 3; ++i) {
-    c[i] = (char)255*rgb[i];
-  }
-}
 
 #pragma acc routine(hsv_to_rgb) seq
 void hsv_to_rgb(const double *hsv, double *rgb) {
   rgb[0] = 0; rgb[1] = 0; rgb[2] = 0;
   double c = hsv[1]*hsv[2];
   double h_prime = hsv[0]/60;
-  double x = c*(1 - std::abs(std::fmod(h_prime,2.0) - 1));
+  double x = c*(1 - abs(fmod(h_prime,2.0) - 1));
   if(h_prime >= 0 && h_prime <= 1) {
     rgb[0] = c; rgb[1] = x;
   }
@@ -96,11 +46,66 @@ void hsv_to_rgb(const double *hsv, double *rgb) {
   }
 } 
 
+#pragma acc routine(cal_color) seq
+Color cal_color(double pixel_size, double distance, int iter) {
+  Color c;
+  if(iter >= MAX_ITER) {
+    c[0] = 255; c[1] = 255; c[2] = 255;
+    return c;
+  }
+  // compute hsv
+  double temp;
+  temp = log(iter) / log(MAX_ITER);
+  temp *= 10; temp -= floor(temp);
+  double hsv[3], rgb[3];
+  hsv[0] = temp;
+  hsv[1] = 0.7;
+  if(distance < 0.5*pixel_size) {
+    temp = pow(2*distance/pixel_size,1./3);
+    hsv[2] = temp;
+  }
+  else {
+    hsv[2] = 1;
+  }
+  // convert to hsv
+  hsv_to_rgb(hsv,rgb);
+  // convert to char
+  for(int i = 0; i < 3; ++i) {
+    c[i] = (char)255*rgb[i];
+  }
+  return c;
+}
+
+#pragma acc routine(cal_pixel) seq
+Color cal_pixel(double pixel_size, Complex pt){
+  int iter;
+  Complex z, dz;
+  double temp, length_sq, distance;
+  z.real = 0; z.imag = 0;
+  dz.real = 0; dz.real = 0;
+  iter = 0;
+
+  do{
+    temp = z.real * dz.real - z.imag * dz.imag;
+    dz.imag = 4 * dz.real * z.imag;
+    dz.real = 2 * temp + 1; 
+    temp = z.real * z.real - z.imag * z.imag + pt.real;
+    z.imag = 2 * z.real * z.imag + pt.imag;
+    z.real = temp;
+    length_sq = z.real * z.real + z.imag * z.imag;
+    iter++;
+  }
+  while ((length_sq < MAX_LENGTH_SQ) && (iter < MAX_ITER));
+  temp = dz.real * dz.real + dz.imag + dz.imag;
+  distance = 2*log(length_sq) * length_sq / temp;
+  return cal_color(pixel_size,distance,iter);
+}
+
 #define MASTERPE 0
 int main(int argc, char **argv){
   FILE *file;
   int i, j;
-  Complex c;
+  Complex pt;
   int tmp;
   // for writing out integers
   Color *data;
@@ -147,12 +152,11 @@ int main(int argc, char **argv){
 #pragma acc parallel loop private(c, tmp) collapse(2) present(data[0:nrows_l*ny])
   for (i = mystrt; i <= myend; ++i){
     for (j = 0; j < ny; ++j){
-      c.real = i/((double) nx) * 4. - 2.;
-      c.imag = j/((double) ny) * 4. - 2.;
-      cal_pixel(pixel_size,c,data[i*nx + j]);
+      pt.real = i/((double) nx) * 4. - 2.;
+      pt.imag = j/((double) ny) * 4. - 2.;
+      data[i*nx + j] = cal_pixel(pixel_size,pt);
     }
   }
-  //  data_l = data_l_tmp;
 #pragma acc exit data copyout(data[0:nrows_l*ny])
   if (mype == MASTERPE){
     file = fopen("mandelbrot.bin", "w");

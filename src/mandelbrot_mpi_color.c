@@ -170,16 +170,16 @@ int main(int argc, char **argv){
     fclose(file);
 
     for (i = 1; i < nprocs; ++i){
-      //MPI_Recv(data_l, nrows_l * ny, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, &status);
-      //printf("received message from proc %d\n", i);
-      //file = fopen("mandelbrot.bin_0000", "a");
-      //fwrite(data_l, nrows_l*ny, sizeof(double), file);
-      //fclose(file);
+      MPI_Recv(data_l, nrows_l * ny, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, &status);
+      printf("received message from proc %d\n", i);
+      file = fopen("mandelbrot.bin_0000", "a");
+      fwrite(data_l, nrows_l*ny, sizeof(double), file);
+      fclose(file);
     }
   }
 
   else{
-    //MPI_Send(data_l, nrows_l * ny, MPI_DOUBLE, MASTERPE, 0, MPI_COMM_WORLD);
+    MPI_Send(data_l, nrows_l * ny, MPI_DOUBLE, MASTERPE, 0, MPI_COMM_WORLD);
   }
 
   MPI_Finalize();

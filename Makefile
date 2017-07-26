@@ -30,7 +30,7 @@ $(OBJ_DIR):
 
 # Link objects into executable(s)
 
-mandelbrot: $(OBJ_FILES)
+$(EXECUTABLE): $(OBJ_FILES)
 	$(CXX) $(CXXFLAGS) mandelbrot_mpi.o -o $@ $(LDFLAGS) $(LDLIBS)
 
 # Create objects from source files
@@ -56,3 +56,7 @@ clean:
 	rm -rf $(OBJ_DIR)*
 	rm -rf $(EXECUTABLE)
 #rm *o mandelbrot
+
+
+# Debug makefile
+print-%  : ; @echo $* = $($*)

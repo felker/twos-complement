@@ -49,7 +49,9 @@ void hsv_to_rgb(const double *hsv, double *rgb) {
 #pragma acc routine(cal_color) seq
 void cal_color(double pixel_size, double distance, int iter, Color *c) {
   if(iter >= MAX_ITER) {
-    c[0] = 255; c[1] = 255; c[2] = 255;
+    for(i = 0; i < 2; ++i)
+      c[i] = (unsigned char)255;
+    }
   }
   // compute hsv
   double temp;
@@ -69,7 +71,7 @@ void cal_color(double pixel_size, double distance, int iter, Color *c) {
   hsv_to_rgb(hsv,rgb);
   // convert to char
   for(int i = 0; i < 3; ++i) {
-    c[i] = (char)255*rgb[i];
+    c[i] = (unsigned char)255*rgb[i];
   }
 }
 
